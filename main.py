@@ -6,14 +6,15 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import datetime
 import os
-NAME = "Быстрова"
-N = 10
+import argparse
+#NAME = "Быстрова"
+#N = 10
 
-now = datetime.datetime.now()
-os.mkdir("{}.{}".format(now.day, now.month))
-os.chdir("{}.{}".format(now.day, now.month))
+#now = datetime.datetime.now()
+#os.mkdir("{}.{}".format(now.day, now.month))
+#os.chdir("{}.{}".format(now.day, now.month))
 
-def life_news_collect(site='https://life.ru/top', n=N):
+def life_news_collect(n, site='https://life.ru/top'):
     """Скачивает главную страницу life.ru, ищет новости"""
 
     page = urllib.request.urlopen(site)
@@ -25,7 +26,7 @@ def life_news_collect(site='https://life.ru/top', n=N):
     articles = articles[::2][:n] #Тут мы ограничиваем количество статей до N, чтобы не качать лишнее
     return articles
 
-def life_visit_articles(articles, name=NAME):
+def life_visit_articles(articles, name):
     """
     Посещает страницы life.ru и выкачивает информацию.
     Возвращает датафрейм pandas из следующих списков:
@@ -71,11 +72,11 @@ def life_visit_articles(articles, name=NAME):
 
     return pd.DataFrame(items)
 
-life_articles = life_news_collect()
-life_items = life_visit_articles(life_articles)
+#life_articles = life_news_collect()
+#life_items = life_visit_articles(life_articles)
 
 
-def provlad_news_collect(site="https://provladimir.ru/", n=N):
+def provlad_news_collect(n, site="https://provladimir.ru/"):
     """Собирает ссылки на новости с сайта газеты ПРОВЛАДИМИР"""
     page = requests.get(site)
     text = page.text
@@ -87,7 +88,7 @@ def provlad_news_collect(site="https://provladimir.ru/", n=N):
     articles = [article[:-1] for article in articles][:n]
     return articles
 
-def provlad_visit_articles(articles, name=NAME):
+def provlad_visit_articles(articles, name):
     """
     Посещает страницы provladimir.ru и выкачивает информацию.
     Возвращает датафрейм pandas из следующих списков:
@@ -121,10 +122,10 @@ def provlad_visit_articles(articles, name=NAME):
             f.write(text_article)
     return pd.DataFrame(items)
 
-provlad_articles = provlad_news_collect()
-provlad_items = provlad_visit_articles(provlad_articles)
+#provlad_articles = provlad_news_collect()
+#provlad_items = provlad_visit_articles(provlad_articles)
 
-def rbk_collect(site="https://www.rbc.ru/", n=N):
+def rbk_collect(n, site="https://www.rbc.ru/"):
     """Собирает ссылки на новости с сайта газеты РБК"""
     page = requests.get(site)
     text = page.text
@@ -138,7 +139,7 @@ def rbk_collect(site="https://www.rbc.ru/", n=N):
     articles = articles_reg.findall(articles)[:n]
     return articles
 
-def rbk_visit_articles(articles, name=NAME):
+def rbk_visit_articles(articles, name):
     """
     Посещает страницы rbc.ru и выкачивает информацию.
     Возвращает датафрейм pandas из следующих списков:
@@ -180,8 +181,30 @@ def rbk_visit_articles(articles, name=NAME):
     return pd.DataFrame(items)
 
 
-rbk_articles = rbk_collect()
-rbk_items = rbk_visit_articles(rbk_articles)
+#rbk_articles = rbk_collect()
+#rbk_items = rbk_visit_articles(rbk_articles)
 
-df = pd.concat([life_items, provlad_items, rbk_items])
-df.to_excel("Output.xlsx")
+#df = pd.concat([life_items, provlad_items, rbk_items])
+#df.to_excel("Output.xlsx")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Parser Params')
+    parser.add_argument(type=str, help='Who writes the data', dest='NAME')
+    parser.add_argument(type=int, help='How many articles from each site is needed', dest="N")
+    args = parser.parse_args()
+    NAME = args.NAME
+    N = args.N
+
+    now = datetime.datetime.now()
+    os.mkdir("{}.{}".format(now.day, now.month))
+    os.chdir("{}.{}".format(now.day, now.month))
+
+    life_articles = life_news_collect(n=N)
+    life_items = life_visit_articles(life_articles, name=NAME)
+    provlad_articles = provlad_news_collect(n=N)
+    provlad_items = provlad_visit_articles(provlad_articles, name=NAME)
+    rbk_articles = rbk_collect(n=N)
+    rbk_items = rbk_visit_articles(rbk_articles, name=NAME)
+
+    df = pd.concat([life_items, provlad_items, rbk_items])
+    df.to_excel("Output.xlsx")
