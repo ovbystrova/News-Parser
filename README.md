@@ -1,6 +1,8 @@
 # News-Parser
 Parser for life.ru, provladimir.ru, rbc.ru. For university project on News Headlines
 
+Запустить через консоль: python main.py %Разметчик% %Кол-во%
+
 Программа создает папку с датой запуска.
 
 Парсер переходит на главную страницу из вышеперечисленных, собирает ссылки на новости.
