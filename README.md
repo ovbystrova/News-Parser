@@ -1,7 +1,7 @@
 # News-Parser
 ## Parser for life.ru; provladimir.ru; rbc.ru. For university project on News Headlines.
 
-Запустить через консоль: python main.py _%Разметчик%_ _%Кол-во%_
+Запустить через консоль: **python  main.py _%Разметчик%_ _%Кол-во%_**
 
 - Программа создает папку с датой запуска.
 
