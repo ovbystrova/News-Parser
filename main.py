@@ -7,12 +7,7 @@ from bs4 import BeautifulSoup
 import datetime
 import os
 import argparse
-#NAME = "Быстрова"
-#N = 10
 
-#now = datetime.datetime.now()
-#os.mkdir("{}.{}".format(now.day, now.month))
-#os.chdir("{}.{}".format(now.day, now.month))
 
 def life_news_collect(n, site='https://life.ru/top'):
     """Скачивает главную страницу life.ru, ищет новости"""
@@ -23,14 +18,16 @@ def life_news_collect(n, site='https://life.ru/top'):
     text = reg_news.findall(text)[0]
     reg_articles = re.compile('https://life.ru/\d{6,8}', re.DOTALL)
     articles = reg_articles.findall(text)
-    articles = articles[::2][:n] #Тут мы ограничиваем количество статей до N, чтобы не качать лишнее
+    articles = articles[::2][:n]
     return articles
+
 
 def life_visit_articles(articles, name):
     """
     Посещает страницы life.ru и выкачивает информацию.
     Возвращает датафрейм pandas из следующих списков:
-    Заголовок(name_z), статья(name_s), дата, источник(life.ru/), ссылка(article), название, тип новости, тип манипуляции(''), заголовок(название), пояснение, разметчик (NAME)
+    Заголовок(name_z), статья(name_s), дата, источник(life.ru/), ссылка(article),
+    название, тип новости, тип манипуляции(''), заголовок(название), пояснение, разметчик (NAME)
     """
 
     items = []
@@ -50,7 +47,7 @@ def life_visit_articles(articles, name):
         name_z = translit(title, 'ru', reversed=True)[:9] + '_z'
         name_s = translit(title, 'ru', reversed=True)[:9] + '_s'
         item = [name_z, name_s, date, source, href, title, category,
-                 manipulation, title, article, name]
+                manipulation, title, article, name]
         items.append(item)
 
         with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
@@ -60,10 +57,7 @@ def life_visit_articles(articles, name):
         try:
             text_article = page_content.find_all(class_='longread-content')[0]
         except:
-            try:
-                text_article = page_content.find_all(class_='content-note js-mediator-article')[0]
-            except:
-                print(article)
+            text_article = page_content.find_all(class_='content-note js-mediator-article')[0]
         text_article = re.sub('<.*?>', '', str(text_article), flags=re.DOTALL)
         text_article = re.sub("\(function.*?yandexZenAsyncCallbacks'\);", '', text_article, flags=re.DOTALL)
         text_article = re.sub('\s{2,}', '\n', text_article)
@@ -71,9 +65,6 @@ def life_visit_articles(articles, name):
             f.write(text_article)
 
     return pd.DataFrame(items)
-
-#life_articles = life_news_collect()
-#life_items = life_visit_articles(life_articles)
 
 
 def provlad_news_collect(n, site="https://provladimir.ru/"):
@@ -87,6 +78,7 @@ def provlad_news_collect(n, site="https://provladimir.ru/"):
     articles = reg_article.findall(text)
     articles = [article[:-1] for article in articles][:n]
     return articles
+
 
 def provlad_visit_articles(articles, name):
     """
@@ -116,20 +108,16 @@ def provlad_visit_articles(articles, name):
         page_content = BeautifulSoup(page.content, "html.parser")
         text_article = page_content.find_all(class_='entry-content entry clearfix')[0]
         text_article = re.sub('<.*?>', '', str(text_article), flags=re.DOTALL)
-        #text_article = re.sub("\(function.*?yandexZenAsyncCallbacks'\);", '', text_article, flags=re.DOTALL)
         text_article = re.sub('\s{2,}', '\n', text_article)
         with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
             f.write(text_article)
     return pd.DataFrame(items)
 
-#provlad_articles = provlad_news_collect()
-#provlad_items = provlad_visit_articles(provlad_articles)
 
 def rbk_collect(n, site="https://www.rbc.ru/"):
     """Собирает ссылки на новости с сайта газеты РБК"""
     page = requests.get(site)
     text = page.text
-    #print(text)
 
     reg_news = re.compile('<div class="main__feed js-main-reload-item".*?</div>', flags=re.DOTALL)
     text = ''.join(reg_news.findall(text))
@@ -138,6 +126,7 @@ def rbk_collect(n, site="https://www.rbc.ru/"):
     articles_reg = re.compile('https://.*?_main', flags=re.DOTALL)
     articles = articles_reg.findall(articles)[:n]
     return articles
+
 
 def rbk_visit_articles(articles, name):
     """
@@ -180,12 +169,6 @@ def rbk_visit_articles(articles, name):
             f.write(text_article)
     return pd.DataFrame(items)
 
-
-#rbk_articles = rbk_collect()
-#rbk_items = rbk_visit_articles(rbk_articles)
-
-#df = pd.concat([life_items, provlad_items, rbk_items])
-#df.to_excel("Output.xlsx")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Parser Params')
