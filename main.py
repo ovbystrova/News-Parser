@@ -9,7 +9,7 @@ import os
 import argparse
 
 
-def life_news_collect(n, site='https://life.ru/top'):
+def life_news_collect(n, site='https://life.ru/'):
     """Скачивает главную страницу life.ru, ищет новости"""
 
     page = urllib.request.urlopen(site)
@@ -40,12 +40,13 @@ def life_visit_articles(articles, name):
         manipulation = ''
         reg_date = re.compile('datePublished" content=".*?T', flags=re.DOTALL)
         date = reg_date.findall(text)[0][24:-1] #Костыль, исправь потом, плюс конвертни дату из год-месяц-день в день.месяц.год
+        date = '{}.{}.{}'.format(date[-2:], date[5:7], date[:4]) #Переводим в формат день.месяц.год
         reg_title = re.compile('<title>.*?- «Life.ru»')
         title = reg_title.findall(text)[0][7:-12] #Аналогично с датой.
         reg_category = re.compile('<meta name="mediator_theme".*?>')
         category = reg_category.findall(text)[0][37:-2]
-        name_z = translit(title, 'ru', reversed=True)[:9] + '_z'
-        name_s = translit(title, 'ru', reversed=True)[:9] + '_s'
+        name_z = translit(title, 'ru', reversed=True)[:9] + translit(title, 'ru', reversed=True)[12:15] + '_z'
+        name_s = translit(title, 'ru', reversed=True)[:9] + translit(title, 'ru', reversed=True)[12:15] + '_s'
         item = [name_z, name_s, date, source, href, title, category,
                 manipulation, title, article, name]
         items.append(item)
@@ -142,6 +143,7 @@ def rbk_visit_articles(articles, name):
         date_reg = re.compile('<span class="article__header__date".*?</span>', flags=re.DOTALL)
         date = date_reg.findall(text)[0]
         date = re.search('\d{4}-\d{2}-\d{2}', date, flags=re.DOTALL)[0]
+        date = '{}.{}.{}'.format(date[-2:], date[5:7], date[:4])  # Переводим в формат день.месяц.год
         source = "https://www.rbc.ru/"
 
         reg_title = re.compile('<title>.*?</title>', flags=re.DOTALL)
