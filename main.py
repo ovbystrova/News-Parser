@@ -41,6 +41,7 @@ def life_visit_articles(articles, name):
         reg_date = re.compile('datePublished" content=".*?T', flags=re.DOTALL)
         date = reg_date.findall(text)[0][24:-1] #Костыль, исправь потом, плюс конвертни дату из год-месяц-день в день.месяц.год
         date = '{}.{}.{}'.format(date[-2:], date[5:7], date[:4]) #Переводим в формат день.месяц.год
+        #date = f'{date[-2:]}.{date[5:7]}.{date[:4}'
         reg_title = re.compile('<title>.*?- «Life.ru»')
         title = reg_title.findall(text)[0][7:-12] #Аналогично с датой.
         reg_category = re.compile('<meta name="mediator_theme".*?>')
@@ -51,8 +52,8 @@ def life_visit_articles(articles, name):
                 manipulation, title, article, name]
         items.append(item)
 
-        with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
-            f.write(title)
+        #with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
+        #    f.write(title)
 
         page_content = BeautifulSoup(page.content, "html.parser")
         try:
@@ -62,9 +63,11 @@ def life_visit_articles(articles, name):
         text_article = re.sub('<.*?>', '', str(text_article), flags=re.DOTALL)
         text_article = re.sub("\(function.*?yandexZenAsyncCallbacks'\);", '', text_article, flags=re.DOTALL)
         text_article = re.sub('\s{2,}', '\n', text_article)
-        with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
-            f.write(text_article)
+        #with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
+        #    f.write(text_article)
 
+        with open('life_lengths.txt', 'a', encoding='utf-8') as f:
+            f.write(str(len(text_article)) + ' ')
     return pd.DataFrame(items)
 
 
@@ -103,15 +106,18 @@ def provlad_visit_articles(articles, name):
         category = reg_category.findall(text)[-1][38:-4]
         item = [name_z, name_s, date, source, article, title, category, '', title, article, name ]
         items.append(item)
-        with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
-            f.write(title)
+        #with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
+            #f.write(title)
 
         page_content = BeautifulSoup(page.content, "html.parser")
         text_article = page_content.find_all(class_='entry-content entry clearfix')[0]
         text_article = re.sub('<.*?>', '', str(text_article), flags=re.DOTALL)
         text_article = re.sub('\s{2,}', '\n', text_article)
-        with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
-            f.write(text_article)
+        #with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
+            #f.write(text_article)
+
+        with open('provlad_lengths.txt', 'a', encoding='utf-8') as f:
+            f.write(str(len(text_article)) + ' ')
     return pd.DataFrame(items)
 
 
@@ -157,8 +163,8 @@ def rbk_visit_articles(articles, name):
         item = [name_z, name_s, date, source, article, title, category, '', title, article, name]
         items.append(item)
 
-        with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
-            f.write(title)
+        #with open('{}.txt'.format(name_z), 'w', encoding='utf-8') as f:
+        #    f.write(title)
 
         page_content = BeautifulSoup(page.content, "html.parser")
         text_article = page_content.find_all(class_='article__text')
@@ -167,8 +173,11 @@ def rbk_visit_articles(articles, name):
         text_articlet = ''.join(reg_text.findall(str(text_article)))
         text_article = re.sub('<.*?>', '', str(text_article), flags=re.DOTALL)
         text_article = re.sub('\s{2,}', '\n', text_article)
-        with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
-            f.write(text_article)
+        #with open('{}.txt'.format(name_s), 'w', encoding='utf-8') as f:
+        #    f.write(text_article)
+
+        with open('rbk_lengths.txt', 'a', encoding='utf-8') as f:
+            f.write(str(len(text_article)) + ' ')
     return pd.DataFrame(items)
 
 
@@ -181,8 +190,8 @@ if __name__ == "__main__":
     N = args.N
 
     now = datetime.datetime.now()
-    os.mkdir("{}.{}".format(now.day, now.month))
-    os.chdir("{}.{}".format(now.day, now.month))
+    #os.mkdir("{}.{}".format(now.day, now.month))
+    #os.chdir("{}.{}".format(now.day, now.month))
 
     life_articles = life_news_collect(n=N)
     life_items = life_visit_articles(life_articles, name=NAME)
